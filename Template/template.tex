@@ -1,0 +1,160 @@
+\documentclass[twoside]{amsart}
+\usepackage{fullpage}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc} 
+\usepackage{lmodern}
+
+% Set this to true for English, false for Slovene
+\newif\ifenglish
+\englishfalse  % Change to \englishtrue for English
+
+\ifenglish
+  % English language support
+  \usepackage[english]{babel}
+\else
+  % Slovenian language support
+  \usepackage[slovene]{babel}  % Commennt if Slovenian support is unavailable
+\fi
+
+\usepackage{hyperref}
+\usepackage{amsmath,amssymb,amsfonts,mathtools}
+\usepackage{graphicx}
+\graphicspath{{./images/}}
+
+\linespread{1.2}
+
+% Custom commands
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\providecommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\probP}{\text{I\kern-0.15em P}}
+\newcommand{\E}{\mathbb{E}}
+
+% Custom commands for proof pages
+\newcommand{\proofpage}{\clearpage\ifodd\value{page}\null\clearpage\fi}
+\newcommand{\statementpage}{\clearpage\ifodd\value{page}\else\null\clearpage\fi}
+
+% Theorem environments - upright text
+\theoremstyle{definition}
+\ifenglish
+  \newtheorem{definition}{Definition}[section]
+  \newtheorem{example}[definition]{Example}
+  \newtheorem{remark}[definition]{Remark}
+  \renewcommand\endexample{\hfill$\diamondsuit$}
+\else
+  \newtheorem{definicija}{Definicija}[section]
+  \newtheorem{primer}[definicija]{Primer}
+  \newtheorem{opomba}[definicija]{Opomba}
+  \renewcommand\endprimer{\hfill$\diamondsuit$}
+\fi
+
+% Theorem environments - italic text
+\theoremstyle{plain}
+\ifenglish
+  \newtheorem{lemma}[definition]{Lemma}
+  \newtheorem{theorem}[definition]{Theorem}
+  \newtheorem{proposition}[definition]{Proposition}
+  \newtheorem{corollary}[definition]{Corollary}
+\else
+  \newtheorem{lema}[definicija]{Lema}
+  \newtheorem{izrek}[definicija]{Izrek}
+  \newtheorem{trditev}[definicija]{Trditev}
+  \newtheorem{posledica}[definicija]{Posledica}
+\fi
+
+\newcommand\Vtextvisiblespace[1][.3em]{%
+\mbox{\kern.06em\vrule height.3ex}%
+\vbox{\hrule width#1}%
+\hbox{\vrule height.3ex}}
+
+\title{Naslov dokumenta}
+\author{Ime Priimek}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{Uvod}
+
+Predloga, kjer so definicije, izreki in posledice na sprednjih straneh 
+(lihe številke), dokazi in primeri pa na zadnjih straneh (sode številke).
+
+\statementpage
+
+\section{Osnovni koncepti}
+
+\begin{definicija}
+  To je primer definicije, ki se bo pojavila na sprednji strani.
+\end{definicija}
+
+\begin{izrek}\label{izr:primer}
+  To je primer izreka, ki se bo pojavil na sprednji strani.
+\end{izrek}
+
+\begin{posledica}
+  To je primer posledice, ki se bo pojavila na sprednji strani.
+\end{posledica}
+
+\proofpage
+
+\begin{proof}[Dokaz izreka \ref{izr:primer}]
+  To je dokaz izreka, ki se bo pojavil na zadnji strani.
+  \[
+      \E[X] = \sum x \probP(x).
+  \]
+\end{proof}
+
+\begin{primer}
+  To je primer, ki se bo pojavil na zadnji strani skupaj z dokazi.
+  \begin{align*}
+      B(\mathbf{0}, 1) &= \{(x,y) \in \R^2 \mid d(\mathbf{0}, (x,y)) < 1\} \\
+      &= \{(x,y) \in \R^2 \mid x^2 + y^2 < 1\}.
+  \end{align*}
+  Prikazana na sliki~\ref{img:alpha1},
+\end{primer}
+
+
+\statementpage
+
+\section{Napredne teme}
+
+\begin{definicija}[Še ena definicija]
+  Definicije, izreki in posledice se vedno pojavljajo na lihih straneh (spredaj).
+\end{definicija}
+
+\begin{lema}\label{lem:pomozna}
+  To je pomožna lema.
+\end{lema}
+
+\begin{trditev}
+  To je trditev, ki bo na sprednji strani.
+\end{trditev}
+
+\proofpage
+
+\begin{proof}[Dokaz leme~\ref{lem:pomozna}]
+  Dokaz pomožne leme se pojavi na zadnji strani.
+\end{proof}
+
+\begin{opomba}
+  Opombe lahko postavite na katerokoli stran, odvisno od konteksta.
+\end{opomba}
+
+\begin{primer}
+  Primeri se pojavljajo na zadnjih straneh skupaj z dokazi.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.3\textwidth]{alpha1.jpg}
+    \caption{Odprta krogla v ravnini.} 
+    \label{img:alpha1} % After caption
+\end{figure}
+
+\end{primer}
+
+\end{document}
