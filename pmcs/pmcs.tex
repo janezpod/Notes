@@ -1,0 +1,264 @@
+\documentclass[twoside]{amsart}
+\usepackage{fullpage}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc} 
+\usepackage{lmodern}
+
+% Set this to true for English, false for Slovene
+\newif\ifenglish
+\englishtrue  % Change to \englishtrue for English
+
+\ifenglish
+  % English language support
+  \usepackage[english]{babel}
+\else
+  % Slovenian language support
+  \usepackage[slovene]{babel}  % Commennt if Slovenian support is unavailable
+\fi
+
+\usepackage{hyperref}
+\usepackage{amsmath,amssymb,amsfonts,mathtools}
+\usepackage{graphicx}
+\graphicspath{{./images/}}
+
+\linespread{1.2}
+
+% Custom commands
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\providecommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\probP}{\mathrm{I\kern-0.15em P}}
+\newcommand{\E}{\mathbb{E}}
+
+% Custom commands for proof pages
+\newcommand{\proofpage}{\clearpage\ifodd\value{page}\null\clearpage\fi}
+\newcommand{\statementpage}{\clearpage\ifodd\value{page}\else\null\clearpage\fi}
+
+% Theorem environments - upright text
+\theoremstyle{definition}
+\ifenglish
+  \newtheorem{definition}{Definition}[section]
+  \newtheorem{example}[definition]{Example}
+  \newtheorem{remark}[definition]{Remark}
+  \renewcommand\endexample{\hfill$\diamondsuit$}
+\else
+  \newtheorem{definicija}{Definicija}[section]
+  \newtheorem{primer}[definicija]{Primer}
+  \newtheorem{opomba}[definicija]{Opomba}
+  \renewcommand\endprimer{\hfill$\diamondsuit$}
+\fi
+
+% Theorem environments - italic text
+\theoremstyle{plain}
+\ifenglish
+  \newtheorem{lemma}[definition]{Lemma}
+  \newtheorem{theorem}[definition]{Theorem}
+  \newtheorem{proposition}[definition]{Proposition}
+  \newtheorem{corollary}[definition]{Corollary}
+\else
+  \newtheorem{lema}[definicija]{Lema}
+  \newtheorem{izrek}[definicija]{Izrek}
+  \newtheorem{trditev}[definicija]{Trditev}
+  \newtheorem{posledica}[definicija]{Posledica}
+\fi
+
+\newcommand\Vtextvisiblespace[1][.3em]{%
+\mbox{\kern.06em\vrule height.3ex}%
+\vbox{\hrule width#1}%
+\hbox{\vrule height.3ex}}
+
+\title{Probabilistic methods in computer science}
+\author{Janez Podlogar}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\statementpage
+
+\section{Discrete probability}
+
+\begin{definition}
+    A \emph{sample space} $\Omega$ is a set whose elements represent all possible outcomes
+    of a random experiment.
+\end{definition}
+
+\begin{definition}
+    Let $\Omega$ be a sample space. Subset $\mathcal{F} \subset \mathcal{P}(\Omega)$ is 
+    a \emph{$\sigma$-algebra on $\Omega$} if
+    \begin{itemize}
+        \item $\Omega \in \mathcal{F}$,
+        \item $A \in \mathcal{F} \implies A^\mathsf{c} \in \mathcal{F}$,
+        \item $A_1, A_2, \ldots \in \mathcal{F} \implies \bigcup_{i=1}^\infty A_i \in \mathcal{F}$.
+    \end{itemize}
+    A $\sigma$-algebra represents events which events are ``observable'' or ``measurable'' in our 
+    probability model.
+\end{definition}
+
+\begin{definition}
+    A countably infinite sequence of events $\{A_i\}_{i=1}^{\infty}$ is \emph{pairwise disjoint} if
+    \[
+        \forall i \neq j \colon A_i \cap A_j = \emptyset.
+    \]
+\end{definition}
+
+\begin{definition}
+    Let $\mathcal{F}$ be a $\sigma$-algebra on $\Omega$. A \emph{probability function} is any
+    $\probP \colon \mathcal{F} \to [0,1]$ that satisfies
+    \begin{itemize}
+        \item $\forall A \in \mathcal{F} \colon \probP(A) \geq 0$,
+        \item $\probP(\Omega) = 1$,
+        \item for any countably infinite sequence of pairwise disjoint events
+        $\{A_i\}_{i=1}^\infty$
+        \[
+            \probP\left(\bigcup_{i=1}^\infty A_i\right) = \sum_{i=1}^{\infty} \probP(A_i).
+        \]
+    \end{itemize}
+\end{definition}
+
+\begin{definition}
+    The triple $(\Omega, \mathcal{F}, \probP)$ is called a probability space.
+\end{definition}
+
+We will use discrete probability spaces. In a discrete probability space, the sample space $\Omega$ 
+is finite or countably infinite, and the $\sigma$-algebra $\mathcal{F}$ consists of all subsets
+of $\Omega$. The probability function is uniquely determined by the probabilities of singleton
+events, meaning that for any $A \subseteq \Omega$,
+\[
+    \mathbb{P}(A) = \sum_{\omega \in A} \mathbb{P}(\{\omega\}).
+\]
+
+\begin{lemma}
+    For any two events $A$ and $B$
+    \[
+        \probP(A \cup B) = \probP(A) + \probP(B) - \probP(A \cap B).
+    \]
+\end{lemma}
+
+\begin{lemma}[Union bound]
+    For any countably infinite sequence of events $\{A_i\}_{i=1}^\infty$
+    \[
+        \probP\left(\bigcup_{i=1}^\infty A_i\right) \leq \sum_{i=1}^{\infty} \probP(A_i).
+    \]
+\end{lemma}
+
+\begin{definition}
+    Events $\{A_i\}_{i=1}^\infty$ are \emph{mutually independent} if  for every finite subset 
+    $\{i_1, i_2, \ldots, i_k\} \subseteq \N$
+    \[
+        \probP\left(\bigcap_{j=1}^k A_{i_j}\right) = \prod_{j=1}^k \probP(A_{i_j}).
+    \]
+\end{definition}
+
+\proofpage
+
+\begin{example}\label{ex:fair die}
+    Consider a fair six-sided die throw where we can observe the exact outcome.
+    We define the probability space $(\Omega, \mathcal{F}, \probP)$ where
+    \begin{align*}
+        &\Omega = \{1,2,3,4,5,6\}, \\
+        &\mathcal{F} = \mathcal{P}, \\
+        &\probP(A) = \frac{\abs{A}}{6}.
+    \end{align*}
+    For our $\sigma$-algebra we choose the full full power set, because have complete information 
+    about the die outcome. Every possible subset of $\Omega$ represents a question we can 
+    definitively answer after observing the roll. Observable events include:
+    \begin{itemize}
+        \item $\{5\}$; did we roll a five?
+        \item $\{1,2,3,4\}$; did we roll less than five?
+        \item $\{2,4,6\}$; did we roll an odd number?
+    \end{itemize}
+    All of these events are measurable and can be assigned probabilities.
+\end{example}
+
+\begin{example}
+    Consider the same die throw, but now we can only observe whether the outcome is odd or even.
+    Now the probability space $(\Omega, \mathcal{F}, \probP)$ is
+    \begin{align*}
+        &\Omega = \{1,2,3,4,5,6\}, \\
+        &\mathcal{F} = \{\emptyset, \{1,3,5\}, \{2,4,6\}, \Omega\}, \\
+        &\probP(A) = 
+            \begin{cases}
+                0 & \text{if } A = \emptyset, \\
+                \frac{1}{2} & \text{if } A = \{1,3,5\}, \\
+                \frac{1}{2} & \text{if } A = \{2,4,6\}, \\
+                1 & \text{if } A = \Omega.
+            \end{cases}
+    \end{align*}
+    We chose a coarse because our observational capability is limited to parity. This models 
+    constraints on observation (limited measurement precision) or information available 
+    at a given time (filtrations in stochastic processes).
+\end{example}
+
+\statementpage
+
+\begin{definition}
+    Let $(\Omega, \mathcal{F}, \probP)$ be a probability space. 
+    A \emph{discrete random variable} is a function $X \colon \Omega \to \mathbb{Z}$ 
+    that is measurable with respect to the $\sigma$-algebra $\mathcal{F}$. 
+    That is, for every value $c \in \mathbb{Z}$, the set 
+    $\{\omega \in \Omega \mid X(\omega) = c\} \in \mathcal{F}$.
+    We denote the probability of that eveny by
+    \[
+        \probP(X = c) = \sum_{s \in \Omega \colon X(s) = c} \probP(s).
+    \]
+\end{definition}
+
+\begin{definition}
+    Discrete random variables $\{X_i\}_{i=1}^\infty$ are \emph{mutually independent} if 
+    for every finite subset $\{i_1, i_2, \ldots, i_k\} \subseteq \N$ and for all values 
+    $c_1, c_2, \ldots, c_k \in \mathbb{Z}$,
+    \[
+        \probP(X_{i_1} = c_1, X_{i_2} = c_2, \ldots, X_{i_k} = c_k) 
+        = \prod_{j=1}^k \probP(X_{i_j} = c_j).
+    \]
+\end{definition}
+
+\proofpage
+
+\begin{example}
+    Consider the fair die from example~\ref{ex:fair die}. Define the random variable
+    \[
+        X(\omega) = \omega - 3
+    \]
+    which represents the deviation from the center value.
+    Then $X$ maps $\Omega \to \{-2, -1, 0, 1, 2, 3\} \subset \mathbb{Z}$.
+    
+    For each value $c$, the preimage $\{\omega \in \Omega \mid X(\omega) = c\}$ is measurable
+    \begin{align*}
+        X^{-1}(-2) &= \{1\} \in \mathcal{F}, \quad \probP(X = -2) = \frac{1}{6}, \\
+        X^{-1}(-1) &= \{2\} \in \mathcal{F}, \quad \probP(X = -1) = \frac{1}{6}, \\
+        X^{-1}(0) &= \{3\} \in \mathcal{F}, \quad \probP(X = 0) = \frac{1}{6}.
+    \end{align*}
+    Similarly, $\probP(X = 1) = \probP(X = 2) = \probP(X = 3) = \frac{1}{6}$.
+\end{example}
+
+
+
+\begin{remark}
+    For random variables, pairwise independence does not imply mutual independence. 
+    Consider three random variables where $X_1$ and $X_2$ are independent fair coin flips and
+    $X_3 = (X_1 + X_2) \bmod 2$. Therefore,
+    \begin{align*}
+        X_3 &= 0 \quad \text{if} X_1 = X_2 \\,
+        X_3 &= 1 \quad \text{if} X_1 \neq X_2
+    \end{align*}
+    
+    Then $X_1, X_2, X_3$ are pairwise independent. As they satisfiy
+    \[
+        \forall i \neq j \colon \probP(X_i = a, X_j = b) = \probP(X_i = a) \cdot \probP(X_j = b)
+    \]
+    However, they are mutually independent. Knowing any two variables 
+    completely determines the third
+    \[
+        0 = \probP(X_1 = 0, X_2 = 0, X_3 = 1) \neq
+        \probP(X_1 = 0) \cdot \probP(X_2 = 0) \cdot \probP(X_3 = 1) = \frac{1}{8}.
+    \]
+\end{remark}
+
+\end{document}
