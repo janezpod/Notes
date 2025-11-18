@@ -22,6 +22,9 @@
 \usepackage{graphicx}
 \graphicspath{{./images/}}
 
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
 \linespread{1.2}
 
 % Custom commands
@@ -331,5 +334,90 @@ events, meaning that for any $A \subseteq \Omega$,
         2 \cdot \frac{1}{6}\sum_{i=1}^{6}i = 2 \cdot \frac{7}{2} = 7.
     \]
 \end{example}
+
+\statementpage
+
+\section{QuickSort}
+
+QuickSort is a simple sorting algorithm. The input are $n$ distinct numbers. A call to the funcion begins by 
+choosing a \emph{pivot} element $a$. Then proceeds by comparing every other element to $a$,
+dividing the elements into two sublists: those that are less and those that are greater than the $a$.
+Quicksort then recurisvly sorts these sublists.
+
+\begin{algorithm}
+\caption{Quicksort}
+    \begin{algorithmic}[1]
+        \Require A set $S \subseteq \R$ with $\abs{S} = n$ distinct elements
+        \Ensure A list containing the elements of $S$ in sorted order
+        \If{$\abs{S} = 1$}
+            \State \Return the single element of $S$
+        \Else
+            \State Choose $a \in S$ uniformly at random (the \emph{pivot})
+            \State $S^- \gets \{b \in S \mid b < a\}$
+            \State $S^+ \gets \{b \in S \mid b > a\}$
+            \State \Return $\textsc{Quicksort}(S^-), a, \textsc{Quicksort}(S^+)$
+        \EndIf
+    \end{algorithmic}
+\end{algorithm}
+
+In the worst case, Quicksort runs in time $O(n^2)$, which happens when the pivot is always the smallest or largest element.
+For example let's suppose or input has the form $x_1 = n, x_2 = n-1, \ldots, x_n = 1$ 
+and we always choose the largest element as the pivot. The first pivot comparison requires $n-1$ comparisons. 
+The divison has yielded one empty list (which requires no further work) and the sublist $x_2 = n-1, \ldots, x_n = 1$.
+The next chosen pivot is $n-1$, which requires $n-2$ comparisons. Continuing in this fashion, QuickSort performs
+\[
+    (n-1) + (n-2) + \ldots + 1 = \frac{n(n-1)}{2}
+\]
+comparison.
+
+We have clealy made a bad choice of pivots for the given input. A reasonable choice of pivots would require many fewer
+comparisons. For example, if our pivot always divides the list into two nearly equal pieces, this means each recursive
+call processes a list of half the size. Consequently, only $\log n$ nested calls can be made before reaching a list
+of size $1$. In other words, the total number of comparisons $C(n)$ would obey the recurrence relation
+\[
+    C(n) \leq 2C\left(\frac{n}{2}\right) + O(n).
+\]
+The solution to this recurrence by the Master theorem is $C(n) = O(n \log n)$, which is the best possible result for
+comparison-based sorting. 
+
+\begin{theorem}\label{the:quicksort}
+    Let $C(n)$ be the expected number of comparison made in QuickSort for $n$ elements. Then
+    \[
+        C(n) = O(n \log n).
+    \]
+\end{theorem}
+
+\proofpage
+
+\begin{proof}[First proof of Theorem~\ref{the:quicksort} by recursion]
+    Clearly, $C(0) = C(1) = 0$. For $n > 1$, when we choose a pivot $a$, we make $n-1$ comparison. If the pivot is the $i$-th
+    smallest element, then the two sublists are of size $\abs{S^-} = i-1$ and $\abs{S^+} = n-i$. Since each pivot has the same probability
+    of being chosen, we have
+    \[
+        C(n) = \underbrace{(n-1)}_{\text{partition work}} + \underbrace{\frac{1}{n} \sum_{i=1}^n [C(i-1) + C(n-i)]}_{\text{recursive work}}
+    \]
+    We note that $C(s)$ appears twice in the summation for $s = 0, 1, \ldots, n-1$. For example when $n=6$, $C(2)$ appears 
+    in the terms for $i=2$ and $i=4$. We can see this explicitly by changing the index of summation
+    \begin{align*}
+        C(n) &= (n-1) + \frac{1}{n} \left[ \sum_{i=1}^n C(i-1) + \sum_{i=1}^n C(n-i) \right] \\
+        &= (n-1) + \frac{1}{n} \left[ \underbrace{\sum_{j=0}^{n-1} C(j)}_{\text{substitute } j=i-1} +
+            \underbrace{\sum_{j=0}^{n-1} C(j)}_{\text{substitute } j=n-i}  \right] \\
+        &= (n-1) + \frac{2}{n} \sum_{j=0}^{n-1} C(j).
+    \end{align*}
+
+    Next we use induction to show that $C(n) \leq 5n \log n$.
+\end{proof}
+
+\begin{proof}[Second proof of Theorem~\ref{the:quicksort} by indicator random variables]
+    Let $s_1, s_2, \ldots, s_n$ be the elements of $S$ in sorted order. For $i<j$, we define the indicator
+    \[
+        X_{ij} = 
+        \begin{cases}
+            1 & \text{if } s_i \text{ and } s_j \text{ are compared during QuickSort}, \\
+            0 & \text{otherwise}.
+        \end{cases}
+    \]
+\end{proof}
+
 
 \end{document}
