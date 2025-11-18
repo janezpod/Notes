@@ -83,6 +83,8 @@
 
 \section{Discrete probability}
 
+\subsection{Probability}
+
 \begin{definition}
     A \emph{sample space} $\Omega$ is a set whose elements represent all possible outcomes
     of a random experiment.
@@ -134,14 +136,14 @@ events, meaning that for any $A \subseteq \Omega$,
 \]
 
 \begin{lemma}
-    For any two events $A$ and $B$
+    For any two events $A$ and $B$,
     \[
         \probP(A \cup B) = \probP(A) + \probP(B) - \probP(A \cap B).
     \]
 \end{lemma}
 
 \begin{lemma}[Union bound]
-    For any countably infinite sequence of events $\{A_i\}_{i=1}^\infty$
+    For any countably infinite sequence of events $\{A_i\}_{i=1}^\infty$,
     \[
         \probP\left(\bigcup_{i=1}^\infty A_i\right) \leq \sum_{i=1}^{\infty} \probP(A_i).
     \]
@@ -197,6 +199,8 @@ events, meaning that for any $A \subseteq \Omega$,
 
 \statementpage
 
+\subsection{Discrete random variables}
+
 \begin{definition}
     Let $(\Omega, \mathcal{F}, \probP)$ be a probability space. 
     A \emph{discrete random variable} is a function $X \colon \Omega \to \mathbb{Z}$ 
@@ -219,6 +223,58 @@ events, meaning that for any $A \subseteq \Omega$,
     \]
 \end{definition}
 
+\begin{definition}
+    The \emph{expectation of a discrete random variable $X$} is
+    \[
+        \E[X] = \sum_{x \in \mathbb{Z}} x \probP(X = x),
+    \]
+    The expectation is \emph{finite} if $\sum_{x \in \mathbb{Z}} \abs{x} \probP(X = x) $ 
+    converges, otherwise it is \emph{unbound}.
+\end{definition}
+
+\begin{proposition}
+    For any function $f \colon \mathbb{Z} \to \R$,
+    \[
+        \E[f(X)] = \E[X] = \sum_{x \in \mathbb{Z}} f(x) \probP(X = x).
+    \]
+\end{proposition}
+
+\begin{lemma}
+    For any constant $c$ and discrete random variable $X$
+    \[
+        \E[cX] = c \E[x].
+    \]
+\end{lemma}
+
+\begin{theorem}[Linearity of expectation]
+    For any finite collection of discrete random variables Discrete random variables
+    $\{X_i\}_{i=1}^n$ with finite expectations
+    \[
+        \E \left[ \sum_{i=1}^n X_i \right] = \sum_{i=1}^n \E[X_i].
+    \]
+\end{theorem}
+
+\begin{corollary}
+    For any random variables $X, Y$ and constants $a,b \in \R$,
+    \[
+        \E[aX + bY] = a\E[X] + b\E[Y].
+    \]
+\end{corollary}
+
+\begin{lemma}
+    If random variables $X$ and $Y$ are independent, then
+    \[
+        \E[XY] = \E[X] \cdot \E[Y].
+    \]
+\end{lemma}
+
+\begin{theorem}[Markov's inequality]
+    For a non-negative random variable $X$ and $a \geq 0$,
+    \[
+        \probP(X \geq a) \leq \frac{\E[X]}{a}.
+    \]
+\end{theorem}
+
 \proofpage
 
 \begin{example}
@@ -238,27 +294,42 @@ events, meaning that for any $A \subseteq \Omega$,
     Similarly, $\probP(X = 1) = \probP(X = 2) = \probP(X = 3) = \frac{1}{6}$.
 \end{example}
 
-
-
 \begin{remark}
     For random variables, pairwise independence does not imply mutual independence. 
     Consider three random variables where $X_1$ and $X_2$ are independent fair coin flips and
     $X_3 = (X_1 + X_2) \bmod 2$. Therefore,
     \begin{align*}
-        X_3 &= 0 \quad \text{if} X_1 = X_2 \\,
-        X_3 &= 1 \quad \text{if} X_1 \neq X_2
+        X_3 &= 0 \quad \text{if } X_1 = X_2, \\
+        X_3 &= 1 \quad \text{if } X_1 \neq X_2
     \end{align*}
     
     Then $X_1, X_2, X_3$ are pairwise independent. As they satisfiy
     \[
-        \forall i \neq j \colon \probP(X_i = a, X_j = b) = \probP(X_i = a) \cdot \probP(X_j = b)
+        \forall i \neq j \colon \probP(X_i = a, X_j = b) = \probP(X_i = a) \cdot \probP(X_j = b).
     \]
-    However, they are mutually independent. Knowing any two variables 
+    However, they are not mutually independent. Knowing any two variables 
     completely determines the third
     \[
         0 = \probP(X_1 = 0, X_2 = 0, X_3 = 1) \neq
         \probP(X_1 = 0) \cdot \probP(X_2 = 0) \cdot \probP(X_3 = 1) = \frac{1}{8}.
     \]
 \end{remark}
+
+\begin{remark}
+    Linearity of expectation also holds for countabily infinte summations in certain cases.
+    It can be shown that 
+    \[
+        \E \left[ \sum_{i=1}^\infty X_i \right] = \sum_{i=1}^\infty \E[X_i]
+    \]
+    whenever $\sum_{i=1}^\infty \E[\abs{X_i}]$ converges.
+\end{remark}
+
+\begin{example}
+    The expected value of the sum of two fair dice is
+    \[
+        \E[X_1 + X_2] = \E[X_1] + \E[X_2] = 2\cdot \E[X_1] =
+        2 \cdot \frac{1}{6}\sum_{i=1}^{6}i = 2 \cdot \frac{7}{2} = 7.
+    \]
+\end{example}
 
 \end{document}
