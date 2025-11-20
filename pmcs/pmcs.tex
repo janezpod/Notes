@@ -353,9 +353,9 @@ Quicksort then recurisvly sorts these sublists.
             \State \Return the single element of $S$
         \Else
             \State Choose $p \in S$ uniformly at random (the \emph{pivot})
-            \State $S^- \gets \{b \in S \mid b < a\}$
-            \State $S^+ \gets \{b \in S \mid b > a\}$
-            \State \Return $\textsc{Quicksort}(S^-), a, \textsc{Quicksort}(S^+)$
+            \State $S^- \gets \{a \in S \mid a < p\}$
+            \State $S^+ \gets \{a \in S \mid a > p\}$
+            \State \Return $\textsc{Quicksort}(S^-), p, \textsc{Quicksort}(S^+)$
         \EndIf
     \end{algorithmic}
 \end{algorithm}
@@ -407,7 +407,7 @@ comparison-based sorting.
     We use induction to show that $C(n) \leq 5n \log n$.
     \begin{description}
         \item[Base case ($n=1$)] $C(1) = 0 \leq 5 \cdot 1 \cdot \log 1 = 0$.
-        \item[Inductive step ($n \to n+1$)]
+        \item[Inductive step]
         \begin{align*}
             C(n) &= (n-1) + \frac{2}{n} \sum_{j=0}^{n-1} C(j)
             \leq (n-1) + \frac{2}{n} \sum_{j=0}^{n-1} 5j \log j \quad \text{(by inductive hypothesis)} \\
@@ -425,7 +425,6 @@ comparison-based sorting.
             &\leq 5n\log n \quad \text{(for } n \geq 2\text{)}
         \end{align*}
     \end{description}
-
 \end{proof}
 
 \proofpage
@@ -441,8 +440,8 @@ comparison-based sorting.
     \]
 
     Two elements are compared if and only if one of them is chosen as a pivot when they're both
-    still in the same subset during the recursion. Therefore,
-    Quicksort compares each pair at most once and. The total number of comparisons is
+    still in the same subset during the recursion. Therefore, Quicksort compares each pair at
+    most once. The total number of comparisons is
     \[
         X = \sum_{1 \leq i < j \leq n} X_{ij}.
     \]
@@ -463,12 +462,140 @@ comparison-based sorting.
     \begin{align*}
         \E[X] &\leq \sum_{1 \leq i < j \leq n} \frac{2}{j-i+1} \\
         &= 2 \sum_{i=1}^{n-1} \sum_{j=i+1}^n \frac{1}{j-i+1} \\
-        &= 2 \underbrace{\sum_{i=1}^{n-1} \sum_{k+2}^{n-i+1} \frac{1}{k}}_{\text{substitute } k=j-i+1} \\
+        &= 2 \underbrace{\sum_{i=1}^{n-1} \sum_{k=2}^{n-i+1} \frac{1}{k}}_{\text{substitute } k=j-i+1} \\
         &\leq 2 \sum_{i=1}^{n-1} \sum_{k=1}^{n} \frac{1}{k} \\
         &= 2 \sum_{i=1}^{n-1} H_n \\
         &\leq 2nH_n \\
         &\leq 2n(1 + \log n) = O(n \log n).
     \end{align*}
+\end{proof}
+
+\proofpage
+
+\begin{proof}[Third proof of Theorem~\ref{the:quicksort} by number of subsets that contain a given element]
+    For $s \in S$, let $X_s$ be the number of comparison involving $s$ when it is not a pivot.
+    Then the total number of comparisons is
+    \[
+        X = \sum_{s \in S} X_s.
+    \]
+    For a fixed $s \in S$, let $S_1, S_2, \ldots, S_t$ be the sequence of subsets containing 
+    $s$ during the recursion, where $S_1 = S$ and $S_t = \{s\}$ or $s$ is the pivot for $S_t$. 
+    Therefore, $X_s = t-1$ because $s$ is compared once in each subset except the last one.
+
+    Subset $S_i$ is of type $j$ if
+    \[
+        n \left( \frac{3}{4} \right)^{j+1} < \abs{S_i} \leq n \left( \frac{3}{4} \right)^j
+    \]
+    Type $j$ can only exist for $j = 0, 1, \ldots, \left\lfloor \log_{4/3}n \right\rfloor$,
+    as the upper bound must be at least $n \left( \frac{3}{4} \right)^j \geq 1$. Since 
+    $S_{i+1}$ is formed by choosing a pivot in $S_i$, $\abs{S_{i+1}} < \abs{S_i}$.
+    
+    What is the probability that $S_{i+1}$ is of type $j+1$ given that $S_i$ is of type $j$?
+    Since the pivot is chosen uniformly at random, this happens if the pivot is not among the
+    largest $\frac{1}{4}$ or smallest $\frac{1}{4}$ elements of $S_i$. Therefore,
+    \[
+        \probP(\text{$S_{i+1}$ is of type $(j+1)$} \mid \text{$S_i$ is of type $j$}) = \frac{1}{2}. 
+    \]
+    
+    Let $t_j$ be the number of (consecutive) subsets of type $j$, then $t = \sum_j t_j$.
+    The expected value of $t_j$ is the expected number of trials until the first success
+    (moving to type $(j+1)$) in a sequence of Bernoulli trials with success probability $\frac{1}{2}$.
+    Thus, $\E[t_j] = 2$ and 
+    \[
+    \E[t] = \sum_{j=0}^{\lfloor \log_{4/3} n \rfloor} \E[t_j] \leq 2 \log_{4/3} n + 2 = O(\log n).
+    \]
+    Finally,
+    \[
+        \E[X] = \sum_{s \in S} \E[X_s] = \sum_{s \in S} \left( \E[t] - 1 \right) =
+        n (O(\log n) - 1) = O(n \log n).
+    \]
+\end{proof}
+
+\proofpage
+
+\begin{proof}[Fourth proof of Theorem~\ref{the:quicksort} by sets of different types according to the size]
+    For $j \in \N \cup \{0\}$ define types of subsets as in the previous proof. 
+
+    Fix type $j$. As Quicksort recursively processes subsets, it creates a tree structure 
+    where each node represents a subset. Many nodes may be of type $j$, but we focus on 
+    the \emph{first} sets of type $j$, the first time we encounter type $j$ in each branch.
+    
+    Formally, let $S_1, S_2, \ldots, S_u$ be all first sets of type $j$, where each $S_i$ is 
+    characterized by:
+    \begin{itemize}
+        \item $S_i$ is of type $j$,
+        \item No ancestor of $S_i$ in the recursion tree is of type $j$.
+    \end{itemize}
+    
+    This means $S_i$ is the moment we enter type $j$ in its branch. If $S_i$ has descendants 
+    that are also of type $j$, we do not count them as first sets since $S_i$ itself is already 
+    their ancestor of type $j$.
+
+    The sets $S_1, S_2, \ldots, S_u$ are pairwise disjoint. To see this, consider two 
+    distinct first sets $S_i$ and $S_k$ of type $j$. Since both are first sets of type $j$, 
+    neither is an ancestor of the other, so they lie in different branches of the recursion tree.
+    At some point, a common ancestor was partitioned into disjoint subsets, with $S_i$ and $S_k$ 
+    descending from different partitions. Since partitions remain disjoint throughout recursion, 
+    $S_i \cap S_k = \emptyset$. Therefore,
+    \[
+        \sum_{i=1}^{u} \abs{S_i} \leq n.
+    \]
+    
+    Let $X_j$ be the total number of comparisons in all first sets of type $j$ and their 
+    descendants. For each first set $S_i$ of type $j$, when the pivot is chosen from the 
+    middle half (probability $\frac{1}{2}$), the subset size decreases by at least a factor 
+    of $\frac{3}{4}$, moving to type $j+1$ or beyond. By the same geometric distribution 
+    argument as in the previous proof, the expected number of comparisons 
+    for $S_i$ and all its descendants until leaving type $j$ is at most $2\abs{S_i}$.
+    
+    Therefore,
+    \begin{align*}
+        \E[X_j] &\leq \sum_{i=1}^{u} 2\abs{S_i} = 2\sum_{i=1}^{u} \abs{S_i} \leq 2n.
+    \end{align*}
+    
+    Since there are $O(\log n)$ types,
+    \[
+        \E[\text{total comparisons}] = \sum_{j=0}^{\lfloor \log_{4/3} n \rfloor} \E[X_j] 
+        \leq \sum_{j=0}^{\lfloor \log_{4/3} n \rfloor} 2n = O(n\log n).
+    \]
+\end{proof}
+
+\proofpage
+
+\begin{proof}[Fifth proof of Theorem~\ref{the:quicksort} by modifying Quicksort]
+    We modify Quicksort to \emph{guarantee} good pivots by repeatedly sampling until we find one 
+    where both partitions have size at most $\frac{3}{4}\abs{S}$.
+    \begin{algorithm}
+        \caption{Modified Quicksort}
+        \begin{algorithmic}[1]
+            \Require A set $S \subseteq \R$ with $\abs{S} = n$ distinct elements
+            \Ensure A list containing the elements of $S$ in sorted order
+            \If{$\abs{S} = 1$}
+                \State \Return the single element of $S$
+            \Else
+                \Repeat
+                    \State Choose $p \in S$ uniformly at random (the \emph{pivot})
+                    \State $S^- \gets \{a \in S \mid a < p\}$
+                    \State $S^+ \gets \{a \in S \mid a > p\}$
+                \Until{$\abs{S^-}, \abs{S^+} \leq \frac{3n}{4}$}
+                \State \Return $\textsc{Modified Quicksort}(S^-), p, \textsc{Modified Quicksort}(S^+)$
+            \EndIf
+        \end{algorithmic}
+    \end{algorithm}
+    The probability of choosing a good pivot is $\frac{1}{2}$, since half of the elements
+    satisfy the condition. The expected number of iterations before we find a good pivot is $2$,
+    because this is a sequence of Bernoulli trials with success probability $\frac{1}{2}$.
+    Each iteration requires $n-1$ comparisons (comparing the chosen pivot to all other elements).
+
+    Let $C(n)$ be the expected number of comparisons made by the Modified Quicksort. Then
+    \begin{align*}
+        C(n) &= \mathbb{E}[\text{\# iterations}] \cdot (n-1) + C(n_1) + C(n_2) \\
+        &\leq 2n + C(n_1) + C(n_2),
+    \end{align*}
+    where $n_1 + n_2 = n-1$ and $n_1, n_2 \leq \frac{3n}{4}$ is guaranteed by a good pivot.
+    Either by the Master theorem or by induction, we can show that $C(n) = O(n \log n)$. 
+    Since this modified Quicksort makes more comparisons than the original Quicksort due to
+    the repeated sampling, the original Quicksort also has expected $O(n \log n)$ comparisons.  
 \end{proof}
 
 \end{document}
