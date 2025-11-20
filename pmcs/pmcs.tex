@@ -340,7 +340,7 @@ events, meaning that for any $A \subseteq \Omega$,
 \section{QuickSort}
 
 QuickSort is a simple sorting algorithm. The input are $n$ distinct numbers. A call to the funcion begins by 
-choosing a \emph{pivot} element $a$. Then proceeds by comparing every other element to $a$,
+choosing a \emph{pivot} element $p$. Then proceeds by comparing every other element to $a$,
 dividing the elements into two sublists: those that are less and those that are greater than the $a$.
 Quicksort then recurisvly sorts these sublists.
 
@@ -352,7 +352,7 @@ Quicksort then recurisvly sorts these sublists.
         \If{$\abs{S} = 1$}
             \State \Return the single element of $S$
         \Else
-            \State Choose $a \in S$ uniformly at random (the \emph{pivot})
+            \State Choose $p \in S$ uniformly at random (the \emph{pivot})
             \State $S^- \gets \{b \in S \mid b < a\}$
             \State $S^+ \gets \{b \in S \mid b > a\}$
             \State \Return $\textsc{Quicksort}(S^-), a, \textsc{Quicksort}(S^+)$
@@ -404,11 +404,33 @@ comparison-based sorting.
             \underbrace{\sum_{j=0}^{n-1} C(j)}_{\text{substitute } j=n-i}  \right] \\
         &= (n-1) + \frac{2}{n} \sum_{j=0}^{n-1} C(j).
     \end{align*}
+    We use induction to show that $C(n) \leq 5n \log n$.
+    \begin{description}
+        \item[Base case ($n=1$)] $C(1) = 0 \leq 5 \cdot 1 \cdot \log 1 = 0$.
+        \item[Inductive step ($n \to n+1$)]
+        \begin{align*}
+            C(n) &= (n-1) + \frac{2}{n} \sum_{j=0}^{n-1} C(j)
+            \leq (n-1) + \frac{2}{n} \sum_{j=0}^{n-1} 5j \log j \quad \text{(by inductive hypothesis)} \\
+            &= (n-1) + \frac{10}{n} \left( \sum_{j = 1}^{\lfloor n/2 \rfloor} j \log j +
+            \sum_{j= \lfloor n/2 \rfloor + 1}^{n-1}  j \log j \right) \\
+            &\leq (n-1) + \frac{10}{n} \left( \sum_{j = 1}^{\lfloor n/2 \rfloor} j \log \frac{n}{2} +
+            \sum_{j= \lfloor n/2 \rfloor + 1}^{n-1}  j \log n \right) \\
+            &= (n-1) + \frac{10}{n} \left( \sum_{j = 1}^{\lfloor n/2 \rfloor} j (\log n - 1) +
+            \sum_{j= \lfloor n/2 \rfloor + 1}^{n-1}  j \log n \right) \\
+            &= (n-1) + \frac{10}{n} \left( - \sum_{j=1}^{\lfloor n/2 \rfloor} j 
+            + \log n \sum_{j=1}^{n-1} j \right) \\
+            &= (n-1) + \frac{10}{n} \left( - \frac{\frac{n}{2}(\frac{n}{2} + 1)}{2} + \frac{n(n-1)}{2} \log n \right) \\
+            &= n - 1 - \frac{5n}{4} - \frac{5}{2} + 5n\log n - 5\log n \\
+            &= 5n\log n - \frac{7}{2} - \frac{n}{4} - 5\log n \\
+            &\leq 5n\log n \quad \text{(for } n \geq 2\text{)}
+        \end{align*}
+    \end{description}
 
-    Next we use induction to show that $C(n) \leq 5n \log n$.
 \end{proof}
 
-\begin{proof}[Second proof of Theorem~\ref{the:quicksort} by indicator random variables]
+\proofpage
+
+\begin{proof}[Second proof of Theorem~\ref{the:quicksort} by indicator variables for each comparison]
     Let $s_1, s_2, \ldots, s_n$ be the elements of $S$ in sorted order. For $i<j$, we define the indicator
     \[
         X_{ij} = 
@@ -417,7 +439,36 @@ comparison-based sorting.
             0 & \text{otherwise}.
         \end{cases}
     \]
-\end{proof}
 
+    Two elements are compared if and only if one of them is chosen as a pivot when they're both
+    still in the same subset during the recursion. Therefore,
+    Quicksort compares each pair at most once and. The total number of comparisons is
+    \[
+        X = \sum_{1 \leq i < j \leq n} X_{ij}.
+    \]
+    By linearity of expectation,
+    \[
+        \E[X] = \sum_{1 \leq i < j \leq n} \E{X_{ij}} = \sum_{1 \leq i < j \leq n} \probP(X_{ij} = 1).
+    \]
+    Let $S_{ij}$ be the last subset containing both $s_i$ and $s_j$ during the recursion.
+    The elements $s_i$ and $s_j$ are compared if and only if the chosen pivot from $S_{ij}$
+    is either $s_i$ or $s_j$. Since the pivot is chosen uniformly at random, this happens with probability
+    \[
+        \probP(X_{ij} = 1) = \frac{2}{\abs{S_{ij}}} \leq \frac{2}{j-i+1} 
+    \]
+    Because $S_{ij}$ is the last subset containing both $s_i$ and $s_j$, no element between them 
+    could have been chosen as a pivot yet, otherwise $s_i$ and $s_j$ would have been separated,
+    then $S_ij$ must contain at least all elements between them in sorted order. Therefore
+    $\abs{S_{ij}} = j-i+1$. Thus,
+    \begin{align*}
+        \E[X] &\leq \sum_{1 \leq i < j \leq n} \frac{2}{j-i+1} \\
+        &= 2 \sum_{i=1}^{n-1} \sum_{j=i+1}^n \frac{1}{j-i+1} \\
+        &= 2 \underbrace{\sum_{i=1}^{n-1} \sum_{k+2}^{n-i+1} \frac{1}{k}}_{\text{substitute } k=j-i+1} \\
+        &\leq 2 \sum_{i=1}^{n-1} \sum_{k=1}^{n} \frac{1}{k} \\
+        &= 2 \sum_{i=1}^{n-1} H_n \\
+        &\leq 2nH_n \\
+        &\leq 2n(1 + \log n) = O(n \log n).
+    \end{align*}
+\end{proof}
 
 \end{document}
