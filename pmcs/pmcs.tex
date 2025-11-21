@@ -611,6 +611,7 @@ comparison-based sorting.
     \end{align*}
     where $n_1 + n_2 = n-1$ and $n_1, n_2 \leq \frac{3n}{4}$ is guaranteed by a good pivot.
     Either by the Master theorem or by induction, we can show that $C(n) = O(n \log n)$. 
+    
     Since this modified Quicksort makes more comparisons than the original Quicksort due to
     the repeated sampling, the original Quicksort also has expected $O(n \log n)$ comparisons.  
 \end{proof}
@@ -618,5 +619,39 @@ comparison-based sorting.
 \statementpage
 
 \section{Minimum Cut}
+
+\begin{definition}
+    Let $G=(V,E)$ be a graph with $\abs{V} = n$ vertices. A \emph{cut-set} is a subset of edges
+    $C \subseteq E$ such that removing the edges in $C$ disconnects $G$ into two or more components.
+    A \emph{min-cut} is a cut-set of smallest possible size.
+\end{definition}
+We wish to find a min-cut in a given graph. One way to do this is by using the following randomized
+algorithm. The main operation in the algorithm is \emph{edge contraction}.
+\begin{definition}
+    \emph{Edge contration} on an edge $e = (u,v) \in E$ merges the two vertices $u$ and $v$
+    into a single vertex, eliminating all self loops and edges connecting $u$ and $v$, 
+    and retaining all other edges.
+\end{definition}
+
+The algotihm consists of $n-2$ iterations. In each iteration, the algorith picks an edge
+from the existing edges in the graph and contracts it. Each iteration reduces the number of vertices
+by one. After $n-2$ iterations, only two vertices remain. The algorithm
+returns the set of edges between these two vertices as the cut-set.
+
+\begin{algorithm}
+    \caption{RandMinCut}
+    \begin{algorithmic}[1]
+        \Require Multigraph $G=(V,E)$ with $\abs{V} = n \geq 2$ vertices
+        \Ensure A cut-set $C \subseteq E$
+        \State $G_0 \leftarrow G$
+        \State $i \leftarrow 0$
+        \While{$\abs{V(G_i)} > 2$}
+            \State Choose an edge $e \in E(G_i)$ uniformly at random
+            \State $G_{i+1} \leftarrow$ contract $e$ in $G_i$ 
+            \State $i \leftarrow i + 1$
+        \EndWhile
+        \State \Return $E(G_i)$
+    \end{algorithmic}
+\end{algorithm}
 
 \end{document}
