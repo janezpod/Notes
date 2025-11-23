@@ -40,6 +40,9 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 
+\usepackage{tikz}
+\usetikzlibrary{positioning, shapes, arrows}
+
 \linespread{1.2}
 
 % Custom commands
@@ -653,5 +656,240 @@ returns the set of edges between these two vertices as the cut-set.
         \State \Return $E(G_i)$
     \end{algorithmic}
 \end{algorithm}
+
+\begin{theorem}\label{the:randmincut}
+    Let $G=(V,E)$ be a multigraph with $n$ vertices.
+    The probability that RandMinCut returns a min-cut is at least $\frac{2}{n(n-1)}$.
+\end{theorem}
+
+The probabilty that RandMinCut that chooses the wrong edge to contract,
+increases in each iteration. This is because as the algorithm proceeds, the number of edges
+that do not belong to the min-cut decreases, while the number of edges in the min-cut remains
+the same.
+
+\begin{corollary}\label{co:randmincut}
+    If we run the RandMinCut algorithm $n(n-1)$ times independently, the probability
+    that at least one of the runs returns a min-cut is at least $1 - e^{-2} \approx 0.86$.
+\end{corollary}
+
+\proofpage
+
+\begin{proof}[Proof of Theorem~\ref{the:randmincut}]
+    Let $k$ be the size of a min-cut in $G$. The graph may have of several cut-sets of minimum
+    size. We compute the probability of finding a particular min-cut $C$.
+
+    Since $C$ is a cut-set in the graph, removal of the set $C$ partiotions the set of vertices
+    into two sets, $S$ and $V \setminus S$, such that no edges are connecting vertices
+    in $S$ to vertices in $V \setminus S$.
+
+    RandMinCut returns the cut-set $C$ if and only if no edge in $C$ is contracted during
+    the $n-2$ iterations. Since if we contract any edge in $C$, we merge a vertex in $S$
+    with a vertex in $V \setminus S$. If we never contract an edge in $C$, then after $n-2$ iterations,
+    there will be exactly two vertices remaining, one representing all vertices in $S$
+    and the other representing all vertices in $V \setminus S$. The only edges remaining
+    between these two vertices are those in $C$.
+
+    Let $E_i$ be the event tat the edge contracted in iteration $i$ is not in $C$ and let
+    $F_i = \bigcap_{j=1}^i E_j$ be the event that no edge in $C$ is contracted in the first
+    $i$ iterations. We wish to compute $\probP(F_{n-2})$.
+
+    Since the min-cut is of size $k$, each vertex in $G$ has degree at least $k$. 
+    If any vertex had degree less than $k$, then the set of edges connected to that
+    vertex would form a min-cut. Since eache vertex has at least $k$ edges, the graph must
+    have at least $\frac{nk}{2}$ edges.
+
+    We start by computing $\probP(E_1) = \probP(F_1)$. The first contracted edge is chosen uniformly
+    at random from the set of all edges. The probabilty that we don't choose an edge of $C$ in the
+    first iteration is
+    \[
+        \probP(F_1) \geq 1 - \frac{k}{\frac{nk}{2}} = 1 - \frac{2}{n}.
+    \]
+    Let us suppose that the first contraction did not eliminate an edge of $C$. Therefore,
+    \[
+        \probP(E_2 \mid F_1) \geq 1 - \frac{k}{\frac{(n-1)k}{2}} = 1 - \frac{2}{n-1}.
+    \]
+    Similarly,
+    \[
+        \probP(E_i \mid F_{i-1}) \geq 1 - \frac{k}{\frac{(n-i+1)k}{2}} = 1 - \frac{2}{n-i+1}.
+    \]
+    To compute $\probP(F_{n-2})$, we use the chain rule of conditional probability
+    \begin{align*}
+        \probP(F_{n-2}) &= \probP(E_{n-2} \cap F_{n-3}) \\
+        &= \probP(E_{n-2} \mid F_{n-3}) \cdot \probP(F_{n-3}) \\
+        &= \probP(E_{n-2} \mid F_{n-3}) \cdot \probP(E_{n-3} \mid F_{n-4}) 
+        \cdot \ldots \cdot  \probP(E_2 \mid F_1) \cdot \probP(F_1) \\
+        &\geq \prod_{i=1}^{n-2} \left( 1 - \frac{2}{n-i+1} \right) \\
+        &= \prod_{i=1}^{n-2} \frac{n-i-1}{n-i+1}
+        = \frac{n-2}{n} \cdot \frac{n-3}{n-1} \cdot \frac{n-4}{n-2}
+        \cdot \ldots \cdot \frac{4}{6} \cdot \frac{3}{5} \cdot \frac{2}{4} \cdot \frac{1}{3}
+        = \frac{2}{n(n-1)}.
+    \end{align*}
+\end{proof}
+
+\proofpage
+
+\begin{proof}[Proof of Corollary~\ref{co:randmincut}]
+    Let $A_i$ be the event that the $i$-th run returns a min-cut.
+    Since we run the algorithm independently and $\probP(A_i) \geq \frac{2}{n(n-1)}$, 
+    \begin{align*}
+        \probP(\text{no run returns a min-cut}) 
+        &= \probP\left( \bigcap_i A_i^\mathsf{c} \right) \\
+        &\leq \prod_i \probP(A_i^\mathsf{c}) \\
+        &\leq \left( 1 - \frac{2}{n(n-1)} \right)^{n(n-1)} \\
+        &\leq \left( e^{-\frac{2}{n(n-1)}} \right)^{n(n-1)} \quad \text{using } 1+x \leq e^x \text{ for all } x \in \R \\
+        &= e^{-2} \approx 0.14.
+    \end{align*}
+\end{proof}
+
+\begin{example}\label{ex:mincut}
+    Consider the graph $G$ with vertices $\{1,2,3,4,5\}$ shown below. The minimum cut-set
+    has size $k=2$, consisting of the edges $(3,5)$ and $(4,5)$ that separate vertex $5$ 
+    from the rest of the graph.
+
+    \begin{center}
+    \begin{tikzpicture}[
+        vertex/.style={circle, fill=black, inner sep=2pt},
+        every node/.style={font=\small},
+        scale=0.8
+    ]
+
+    % (a) A successful run of min-cut
+    % Stage 1 - Original graph
+    \begin{scope}[xshift=0cm]
+        \node[vertex, label=above:1] (v1) at (0,1) {};
+        \node[vertex, label=below:2] (v2) at (0,0) {};
+        \node[vertex, label=above:3] (v3) at (1,1) {};
+        \node[vertex, label=below:4] (v4) at (1,0) {};
+        \node[vertex, label=right:5] (v5) at (2.5,0.5) {};
+        
+        \draw (v1) -- (v2);
+        \draw (v1) -- (v3);
+        \draw (v1) -- (v4);
+        \draw (v2) -- (v3);
+        \draw (v2) -- (v4);
+        \draw (v3) -- (v4);
+        \draw (v3) -- (v5);
+        \draw (v4) -- (v5);
+    \end{scope}
+
+    % Stage 2
+    \begin{scope}[xshift=4cm]
+        \node[vertex, label=above:1] (v1) at (0,1) {};
+        \node[vertex, label=below:2] (v2) at (0,0) {};
+        \node[vertex, label=right:5] (v5) at (2.2,0.5) {};
+        \node[vertex] (v34) at (1.1,0.5) {};
+        \node at (1.1,0) {\tiny 3,4};
+        
+        \draw (v1) -- (v2);
+        \draw (v1) to[bend left=20] (v34);
+        \draw (v1) to[bend right=20] (v34);
+        \draw (v2) to[bend left=20] (v34);
+        \draw (v2) to[bend right=20] (v34);
+        \draw (v34) to[bend left=20] (v5);
+        \draw (v34) to[bend right=20] (v5);
+    \end{scope}
+
+    % Stage 3
+    \begin{scope}[xshift=7.5cm]
+        \node[vertex, label=below:2] (v2) at (0,0.5) {};
+        \node[vertex, label=right:5] (v5) at (2.2,0.5) {};
+        \node[vertex] (v134) at (1.1,0.5) {};
+        \node at (1.1,0) {\tiny 1,3,4};
+        
+        \draw (v2) to[bend left=30] (v134);
+        \draw (v2) to[bend right=30] (v134);
+        \draw (v134) to[bend left=20] (v5);
+        \draw (v134) to[bend right=20] (v5);
+    \end{scope}
+
+    % Stage 4
+    \begin{scope}[xshift=11cm]
+        \node[vertex, label=right:5] (v5) at (1.5,0.5) {};
+        \node[vertex] (v1234) at (0,0.5) {};
+        \node at (0,0) {\tiny 1,2,3,4};
+        
+        \draw (v1234) to[bend left=30] (v5);
+        \draw (v1234) to[bend right=30] (v5);
+    \end{scope}
+
+    \node at (5.5, -1) {(a) A successful run of RandMinCut.};
+
+    \end{tikzpicture}
+    \end{center}
+
+    \vspace{0.5cm}
+
+    \begin{center}
+    \begin{tikzpicture}[
+        vertex/.style={circle, fill=black, inner sep=2pt},
+        every node/.style={font=\small},
+        scale=0.8
+    ]
+
+    % (b) An unsuccessful run of min-cut
+    % Stage 1 - Original graph
+    \begin{scope}[xshift=0cm]
+        \node[vertex, label=above:1] (v1) at (0,1) {};
+        \node[vertex, label=below:2] (v2) at (0,0) {};
+        \node[vertex, label=above:3] (v3) at (1,1) {};
+        \node[vertex, label=below:4] (v4) at (1,0) {};
+        \node[vertex, label=right:5] (v5) at (2.5,0.5) {};
+        
+        \draw (v1) -- (v2);
+        \draw (v1) -- (v3);
+        \draw (v1) -- (v4);
+        \draw (v2) -- (v3);
+        \draw (v2) -- (v4);
+        \draw (v3) -- (v4);
+        \draw (v3) -- (v5);
+        \draw (v4) -- (v5);
+    \end{scope}
+
+    % Stage 2
+    \begin{scope}[xshift=4cm]
+        \node[vertex, label=above:1] (v1) at (0,0.7) {};
+        \node[vertex, label=below:2] (v2) at (0,0) {};
+        \node[vertex, label=right:5] (v5) at (2.2,0.35) {};
+        \node[vertex] (v34) at (1.1,0.35) {};
+        \node at (1.1,-0.15) {\tiny 3,4};
+        
+        \draw (v1) -- (v2);
+        \draw[line width=1.5pt] (v1) to[bend left=15] (v34);
+        \draw (v1) to[bend right=15] (v34);
+        \draw (v2) to[bend left=15] (v34);
+        \draw (v2) to[bend right=15] (v34);
+        \draw (v34) to[bend left=20] (v5);
+        \draw (v34) to[bend right=20] (v5);
+    \end{scope}
+
+    % Stage 3
+    \begin{scope}[xshift=7.5cm]
+        \node[vertex, label=above:1] (v1) at (0,0.5) {};
+        \node[vertex, label=below:2] (v2) at (0,0) {};
+        \node[vertex] (v345) at (1.3,0.25) {};
+        \node at (1.5,-0.2) {\tiny 3,4,5};
+        
+        \draw (v1) -- (v2);
+        \draw (v1) to[bend left=20] (v345);
+        \draw (v1) to[bend right=20] (v345);
+        \draw (v2) to[bend left=20] (v345);
+        \draw (v2) to[bend right=20] (v345);
+    \end{scope}
+
+    % Stage 4
+    \begin{scope}[xshift=11cm]
+        \node[vertex, label=above:1] (v1) at (0,0.3) {};
+        \node[vertex] (v2345) at (1.3,0.3) {};
+        \node at (1.5,-0.2) {\tiny 2,3,4,5};
+        
+        \draw (v1) to[bend left=40] (v2345);
+        \draw (v1) to[bend right=40] (v2345);
+    \end{scope}
+
+    \node at (5.5, -1) {(b) An unsuccessful run of RandMinCut.};
+
+    \end{tikzpicture}
+    \end{center}
+\end{example}
 
 \end{document}
