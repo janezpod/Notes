@@ -892,4 +892,78 @@ the same.
     \end{center}
 \end{example}
 
+\statementpage
+
+\section{Types of Randomized Algorithms}
+
+The randomized sorting algorithm and the min-cut algorithm are two
+different types of randomized algorithms. The sorting algorithm always gives
+the correct solution. The only variation from one run to another is its running
+time, whose distribution we study.
+In contrast, the min-cut algorithm may sometimes produce a solution that is
+incorrect. However, we are able to bound the probability of such an incorrect
+solution.. 
+
+\begin{definition}
+    A \emph{randomized algorithm} is an algorithm that uses random bits. The running time 
+    and/or the result of the algorithm is a random variable.
+\end{definition}
+
+\subsection{Las Vegas and Monte Carlo}
+
+\begin{definition}
+    A randomized algorithm is called a \emph{Las Vegas} algorithm if it always returns 
+    the correct answer. If it may return an incorrect answer, it is called a \emph{Monte Carlo}
+    algorithm.
+\end{definition}
+
+For Las Vegas algorithms, we study the expected running time. For Monte Carlo algorithms, 
+there are several subclasses based on the type of errors that can occur.
+
+\subsection{Decision Problems and Error Types}
+
+\begin{definition}
+    A \emph{decision problem} is a computational problem where the output is a single 
+    boolean value: $\top$ or $\bot$. The problem is specified by
+        \begin{itemize}
+        \item A set of inputs $I$,
+        \item A subset $Y \subseteq I$ of $\top$.
+    \end{itemize}
+    For an input $x \in I$, we wish to determine, whether $x \in Y$.
+\end{definition}
+
+\begin{definition}
+    For a decision  problem, we distinguish three types of errors
+    \begin{description}
+        \item[Type 1] The algorithm returns $\bot$ when the correct answer is $\top$;
+        \item[Type 2] The algorithm returns $\top$ when the correct answer is $\bot$;
+        \item[Type 3] The algorithm may return an incorrect answer in either direction. 
+    \end{description}
+\end{definition}
+
+\begin{definition}
+    Let $\Pi$ be a decision problem. A Monte Carlo algorith for $\Pi$ has a
+    \begin{description}
+        \item[One-sided error (Type 1)] When the correct answer is $\top$, returns 
+            $\top$ with probability at least $\frac{2}{3}$. When the correct answer is 
+            $\bot$, always returns $\bot$.
+        \item[One-sided error (Type 2)] When the correct answer is $\top$, always 
+            returns $\top$ (probability 1). When the correct answer is $\bot$, returns 
+            $\bot$ with probability at least $\frac{2}{3}$.
+        \item[Two-sided error (Type 3)] When the correct answer is $\top$, returns 
+            $\top$ with probability at least $\frac{2}{3}$. When the correct answer is 
+            $\bot$, returns $\bot$ with probability at least $\frac{2}{3}$.
+    \end{description}
+\end{definition}
+
+\begin{remark}
+    The choice of $\frac{2}{3}$ is arbitrary. For one sided errors, any constant 
+    greater than $\frac{1}{2}$ can be used. We can repeat the algorithm multiple times to reduce
+    the error probability to any desired level. 
+    
+    For two-sided errors, any constant greater than $\frac{1}{2}$ can be used. 
+    Repeating the algorithm multiple times and taking the majority vote reduces the error 
+    probability to any desired level.
+\end{remark}
+
 \end{document}
